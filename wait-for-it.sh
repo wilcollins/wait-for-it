@@ -1,6 +1,53 @@
 #!/usr/bin/env bash
 #   Use this script to test if a given TCP host/port are available
 
+# NOTE : requires 'timeout' command;
+# run `brew install coreutils` on mac & the alias will be automatically generated at runtime
+
+# enable alias expansion for mac linking
+shopt -s expand_aliases
+
+OS=$(uname -a)
+echo $OS
+
+if [[ $OS =~ "Darwin" ]]
+then
+    export IS_MAC=1
+else
+    export IS_MAC=0
+fi
+
+if [ $IS_MAC ]
+then
+
+    if [[ $(which gtimeout) == "" ]]
+    then
+        export IS_MAC_COREUTILS_INSTALLED=0
+        # removing logging due to duplicate output :(
+        # echo "run 'brew install coreutils'"
+    else
+        export IS_MAC_COREUTILS_INSTALLED=1
+    fi
+
+fi
+
+
+if [[ $(which timeout) == "" ]]
+then
+    export IS_TIMEOUT_INSTALLED=0
+    if [ $IS_MAC_COREUTILS_INSTALLED ]
+    then
+        alias timeout=gtimeout && export IS_TIMEOUT_INSTALLED=1
+    #else
+        # removing logging due to duplicate output :(
+        # echo "The 'timeout' command is required to continue. Please install it before proceeding (gtimeout on Mac via 'coreutils')."
+    fi
+
+else
+    export IS_TIMEOUT_INSTALLED=1
+fi
+
+
 cmdname=$(basename $0)
 
 echoerr() { if [[ $QUIET -ne 1 ]]; then echo "$@" 1>&2; fi }
